@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 })
 export class AppComponent implements OnInit, OnDestroy {
   listNoticias: any[] = [];
+  loading = false;
   headerTitle: string;
   title = 'app-noticias';
   private _noticiaSubscription: Subscription;
@@ -28,18 +29,27 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   buscarNoticias(parametros?: any) {
+    this.loading = true;
+    this.listNoticias = [];
+
     // Cancela la suscripción anterior si existe
     if (this._noticiaSubscription) {
       this._noticiaSubscription.unsubscribe();
     }
-    // Inicia una nueva suscripción
-    this._noticiaSubscription = this._noticiaService
-      .getNoticia(parametros)
-      .subscribe((data) => {
-        console.log(data);
-        this.listNoticias = data.articles;
-      }, error =>{
-        console.log(error)
-      });
+    setTimeout(() => {
+      // Inicia una nueva suscripción
+      this._noticiaSubscription = this._noticiaService
+        .getNoticia(parametros)
+        .subscribe(
+          (data) => {
+            this.loading = false;
+            this.listNoticias = data.articles;
+          },
+          (error) => {
+            console.log(error);
+            this.loading = false;
+          }
+        );
+    }, 1000);
   }
 }
